@@ -1,9 +1,0 @@
-2026-03-07 17:33:26.150275-03:00 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "JDBCSIMPLES" not found (this database is empty); SQL statement:
-SELECT * FROM JDBCSIMPLES [42104-232]
-2026-03-07 17:42:20.084970-03:00 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "JDBCSIMPLES" not found (this database is empty); SQL statement:
-SELECT * FROM JDBCSIMPLES [42104-232]
-2026-03-07 17:47:28.753403-03:00 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "JDBCSIMPLES" not found (this database is empty); SQL statement:
-SELECT * FROM JDBCSIMPLES [42104-232]

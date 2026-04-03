@@ -20,6 +20,11 @@ data/
 
 # Logs
 *.log
-
-# Ignorar o frontend temporariamente
+# --- Frontend (Ignorar por enquanto) ---
 techregistry-web/
+
+# --- Java/Maven ---
+backend/techregistry-api/target/
+backend/techregistry-api/.mvn/
+backend/techregistry-api/mvnw
+backend/techregistry-api/mvnw.cmd
