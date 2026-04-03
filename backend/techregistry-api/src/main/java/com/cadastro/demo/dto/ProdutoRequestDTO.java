@@ -21,4 +21,9 @@ public record ProdutoRequestDTO(
 		@NotNull(message = "A quantidade do produto e obrigatoria.")
 		@PositiveOrZero(message = "A quantidade do produto nao pode ser negativa.")
 		Integer quantidade) {
+
+	public String descricao() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
