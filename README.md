@@ -1,8 +1,8 @@
-# 🚀 TechRegistry Fullstack
+#  Tech Estoque Fullstack
 
-Sistema fullstack para gerenciamento de produtos.
+Sistema fullstack para gerenciamento de produtos e estoque.
 
-## 🧱 Tecnologias
+##  Tecnologias
 
 - Java 21 + Spring Boot
 - PostgreSQL
@@ -12,7 +12,7 @@ Sistema fullstack para gerenciamento de produtos.
 
 ---
 
-## ▶️ Rodar com Docker
+##  Rodar com Docker
 
 ```bash
 docker-compose --env-file .env.docker up --build
