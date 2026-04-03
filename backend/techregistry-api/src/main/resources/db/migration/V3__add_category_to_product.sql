@@ -1,0 +1,2 @@
+ALTER TABLE product
+ADD COLUMN category VARCHAR(100) NOT NULL DEFAULT 'Sem categoria';

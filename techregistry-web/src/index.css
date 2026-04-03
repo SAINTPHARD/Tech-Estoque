@@ -1,0 +1,48 @@
+/*
+ * Arquivo: src/index.css
+ * Responsabilidade: definir os estilos globais mais basicos que valem para toda a aplicacao.
+ * O que voce encontra aqui: tipografia base, reset visual simples e comportamento padrao do body, root e links.
+ * Dica de manutencao: use este arquivo para regras realmente globais; estilos de tela e componente devem ficar mais proximos de onde sao usados.
+ */
+
+:root {
+  font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #0f172a;
+  background-color: #eef4f8;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #eef4f8;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+}

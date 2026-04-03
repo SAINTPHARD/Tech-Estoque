@@ -1,0 +1,22 @@
+# Node
+node_modules
+dist
+
+# Java
+target/
+bin/
+data/
+.m2/
+*.mv.db
+*.trace.db
+
+# Env
+.env*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

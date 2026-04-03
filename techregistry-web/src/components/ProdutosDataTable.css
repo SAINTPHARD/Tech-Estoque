@@ -1,0 +1,283 @@
+/*
+ * Arquivo: src/components/ProdutosDataTable.css
+ * Responsabilidade: controlar o visual da tabela principal de produtos e dos seus estados de carregamento.
+ * O que voce encontra aqui: filtros em chips, tabela, badges de status, acoes por linha e skeleton screens.
+ * Dica de manutencao: qualquer polimento visual da listagem principal deve passar por este arquivo.
+ */
+
+.products-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.products-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.products-filter-chip {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #dce8f3;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #526981;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.products-filter-chip:hover {
+  background: #f8fbff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.products-filter-chip.is-active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.products-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.products-sort-shell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid #dce8f3;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.products-sort-shell span {
+  color: #526981;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.products-sort-select {
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #1f4267;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.products-table-shell {
+  overflow-x: auto;
+  border: 1px solid #e1ebf4;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.products-table {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.products-table thead th {
+  padding: 16px 18px;
+  border-bottom: 1px solid #e6eef6;
+  color: #698096;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  background: #f8fbff;
+}
+
+.products-table tbody td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #eef4f8;
+  color: #1f2937;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+.products-table thead th:last-child,
+.products-table tbody td:last-child {
+  min-width: 116px;
+  width: 116px;
+}
+
+.products-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.product-table-row {
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-table-row:hover td {
+  background: #fbfdff;
+}
+
+.product-table-row.is-selected td {
+  background: #f5f9ff;
+}
+
+.product-table-row.tone-warning td:first-child {
+  box-shadow: inset 4px 0 0 #f59e0b;
+}
+
+.product-table-row.tone-critical td:first-child {
+  box-shadow: inset 4px 0 0 #ef4444;
+}
+
+.product-name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.product-name-cell strong {
+  color: #0f172a;
+  font-size: 0.98rem;
+}
+
+.product-name-cell span {
+  color: #7b91a8;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.product-name-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.product-category-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #36506e;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.product-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.product-status-badge.tone-healthy {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.product-status-badge.tone-warning {
+  background: #ffedd5;
+  border-color: #fdba74;
+  color: #d97706;
+}
+
+.product-status-badge.tone-critical {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.product-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+  min-width: 84px;
+}
+
+.overview-mini-card-skeleton {
+  gap: 10px;
+}
+
+.skeleton-block {
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #edf2f7 0%, #f8fafc 50%, #edf2f7 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.skeleton-line-xs {
+  width: 48px;
+  height: 14px;
+}
+
+.skeleton-line-sm {
+  width: 110px;
+  height: 12px;
+}
+
+.skeleton-line-md {
+  width: 120px;
+  height: 14px;
+}
+
+.skeleton-line-lg {
+  width: 170px;
+  height: 18px;
+}
+
+.skeleton-badge {
+  width: 108px;
+  height: 28px;
+}
+
+.skeleton-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .products-toolbar,
+  .products-toolbar-right {
+    align-items: stretch;
+  }
+
+  .products-sort-shell {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
