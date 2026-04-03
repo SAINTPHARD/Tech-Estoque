@@ -1,0 +1,39 @@
+/*
+ * Arquivo: src/components/common/EditButton.css
+ * Responsabilidade: definir o visual do botao de edicao reutilizavel.
+ * O que voce encontra aqui: tamanho, borda, hover e estado desabilitado.
+ * Quando mexer: altere este arquivo se o botao padrao de editar mudar.
+ */
+
+.icon-button {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid #dbe7f2;
+  border-radius: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.icon-button-edit {
+  color: #2563eb;
+}
+
+.icon-button:hover:not(:disabled) {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  transform: translateY(-1px);
+}
+
+.icon-button-edit:hover:not(:disabled) {
+  color: #1d4ed8;
+}
+
+.icon-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

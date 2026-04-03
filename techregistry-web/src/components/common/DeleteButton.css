@@ -1,0 +1,37 @@
+/*
+ * Arquivo: src/components/common/DeleteButton.css
+ * Responsabilidade: definir o visual do botao de exclusao reutilizavel.
+ * O que voce encontra aqui: estado normal, hover e spinner de carregamento.
+ * Quando mexer: altere este arquivo se a acao visual de excluir mudar.
+ */
+
+.icon-button-delete {
+  border-color: #fee2e2;
+  color: #dc2626;
+}
+
+.icon-button-delete:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.icon-button-delete:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.delete-button-spinner {
+  animation: delete-button-spin 0.9s linear infinite;
+}
+
+@keyframes delete-button-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
