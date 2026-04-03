@@ -14,9 +14,9 @@ public record ProdutoResponseDTO(
 	public ProdutoResponseDTO(Produto produto) {
 		this(
 				produto.getId(),
-				produto.getNome(),
-				produto.getCategoria(),
-				produto.getPreco(),
-				produto.getQuantidade());
+				produto.getName(),
+				produto.getCategory(),
+				produto.getPrice(),
+				produto.getQuantity());
 	}
 }

@@ -25,7 +25,7 @@ import com.cadastro.demo.service.ProdutoService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/produtos")
+@RequestMapping("/api/products")
 public class ProdutoController {
 
 	private final ProdutoService service;

@@ -1,28 +1,73 @@
 /*
  * Arquivo: src/components/layout/Sidebar/Sidebar.css
  * Responsabilidade: definir o visual da navegacao lateral.
- * O que voce encontra aqui: bloco da marca, links de navegacao e card informativo final.
- * Quando mexer: altere este arquivo quando a sidebar mudar de identidade visual.
+ * O que voce encontra aqui: comportamento expandido, recolhido, hover e drawer para tablet/mobile.
+ * Quando mexer: altere este arquivo quando a sidebar mudar de identidade visual ou responsividade.
  */
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(4px);
+  z-index: 28;
+}
 
 .sidebar-shell {
   position: sticky;
   top: 0;
   height: 100vh;
   padding: 24px;
+  overflow: visible;
+  z-index: 20;
 }
 
 .sidebar-card {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   padding: 24px 20px;
   border-right: 1px solid rgba(148, 163, 184, 0.18);
   background:
     radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 38%),
     linear-gradient(180deg, #0f172a 0%, #111c34 100%);
   color: #e2e8f0;
+  transition: width 0.25s ease, padding 0.25s ease, box-shadow 0.25s ease;
+}
+
+.sidebar-topbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sidebar-control {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-control:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.sidebar-control.is-collapsed {
+  transform: rotate(180deg);
+}
+
+.sidebar-control.is-collapsed:hover {
+  transform: rotate(180deg) translateY(-1px);
 }
 
 .sidebar-brand {
@@ -41,6 +86,11 @@
   background: linear-gradient(135deg, #60a5fa, #22c55e);
   color: #0f172a;
   font-weight: 800;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-copy {
+  min-width: 0;
 }
 
 .sidebar-brand strong {
@@ -114,8 +164,49 @@
   color: #94a3b8;
 }
 
-.sidebar-footer {
+.sidebar-shortcuts {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-shortcuts-title {
+  color: #94a3b8;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-shortcut {
+  width: 100%;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-shortcut:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.sidebar-shortcut-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.sidebar-footer {
   padding: 16px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 18px;
@@ -126,36 +217,92 @@
   color: #f8fafc;
 }
 
-@media (max-width: 960px) {
-  .sidebar-shell {
-    position: static;
-    height: auto;
-    padding: 20px 20px 0;
-  }
+.sidebar-shell.is-collapsed .sidebar-card {
+  width: 74px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
 
-  .sidebar-card {
-    height: auto;
-    border-right: 0;
-    border-radius: 24px;
-    border: 1px solid rgba(148, 163, 184, 0.14);
-  }
+.sidebar-shell.is-collapsed:hover .sidebar-card {
+  width: 260px;
+  padding-left: 20px;
+  padding-right: 20px;
+  box-shadow: 24px 0 38px rgba(15, 23, 42, 0.22);
+}
 
-  .sidebar-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-brand-copy,
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-link-copy,
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-shortcuts-title,
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-shortcut span,
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-footer strong,
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-footer p {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  pointer-events: none;
+}
 
-  .sidebar-link {
-    flex: 1 1 220px;
-  }
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-brand,
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-link,
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-shortcut {
+  justify-content: center;
+}
+
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-shortcut {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-footer {
+  padding-left: 10px;
+  padding-right: 10px;
+  min-height: 44px;
+}
+
+.sidebar-shell.is-collapsed:not(:hover) .sidebar-nav {
+  align-items: center;
+}
+
+.sidebar-shell.is-compact {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  height: 100vh;
+  width: min(320px, calc(100vw - 20px));
+  padding: 16px;
+  transform: translateX(calc(-100% - 20px));
+  transition: transform 0.24s ease;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.sidebar-shell.is-compact .sidebar-card {
+  height: 100%;
+  border-right: 0;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 24px 42px rgba(15, 23, 42, 0.28);
+}
+
+.sidebar-shell.is-compact.is-open {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.app-shell.is-sidebar-collapsed .sidebar-shell {
+  padding-left: 12px;
+  padding-right: 12px;
 }
 
 @media (max-width: 640px) {
-  .sidebar-shell {
-    padding: 16px 16px 0;
+  .sidebar-shell.is-compact {
+    width: calc(100vw - 12px);
+    padding: 12px;
   }
 
-  .sidebar-card {
-    padding: 18px 16px;
+  .sidebar-shell.is-compact .sidebar-card {
+    padding: 20px 16px;
   }
 }

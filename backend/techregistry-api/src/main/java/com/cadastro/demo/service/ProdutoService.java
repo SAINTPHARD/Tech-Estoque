@@ -21,6 +21,16 @@ public class ProdutoService {
 		this.repository = repository;
 	}
 
+	/**
+	 * Lista todos os produtos ordenados por ID em ordem decrescente. 
+	 * A anotação @Transactional(readOnly = true) indica que esta operação é apenas de leitura, o que pode otimizar o desempenho e garantir a integridade dos dados durante a execução da consulta.
+	 * @return repository.findAll: Recupera todos os produtos do banco de dados.
+	 * @(Sort.by(Sort.Direction.DESC, "id")): 	Especifica que os resultados devem ser ordenados por ID em ordem decrescente.
+	 *			@.stream(): 					Converte a lista de produtos em um fluxo (stream) para permitir operações funcionais, como mapeamento e filtragem.
+	 *			@.map(ProdutoResponseDTO::new): Transforma cada entidade Produto em um DTO de resposta ProdutoResponseDTO usando o construtor que aceita um Produto como argumento.
+	 *			@.toList(); 					Coleta os resultados do fluxo em uma lista de ProdutoResponseDTO, que é retornada ao chamador.
+	 * @return
+	 */
 	@Transactional(readOnly = true)
 	public List<ProdutoResponseDTO> listarTodos() {
 		return repository.findAll(Sort.by(Sort.Direction.DESC, "id"))
@@ -51,13 +61,13 @@ public class ProdutoService {
 	@Transactional
 	public ProdutoResponseDTO alterarEstoque(Long id, int delta) {
 		Produto produto = buscarEntidade(id);
-		int novaQuantidade = produto.getQuantidade() + delta;
+		int novaQuantidade = produto.getQuantity() + delta;
 
 		if (novaQuantidade < 0) {
 			throw new IllegalArgumentException("Nao e possivel reduzir o estoque abaixo de zero.");
 		}
 
-		produto.setQuantidade(novaQuantidade);
+		produto.setQuantity(novaQuantidade);
 		return new ProdutoResponseDTO(repository.save(produto));
 	}
 
@@ -72,9 +82,9 @@ public class ProdutoService {
 	}
 
 	private void aplicarDados(Produto produto, ProdutoRequestDTO dto) {
-		produto.setNome(dto.nome().trim());
-		produto.setCategoria(dto.categoria().trim());
-		produto.setPreco(dto.preco());
-		produto.setQuantidade(dto.quantidade());
+		produto.setName(dto.nome().trim());
+		produto.setCategory(dto.categoria().trim());
+		produto.setPrice(dto.preco());
+		produto.setQuantity(dto.quantidade());
 	}
 }

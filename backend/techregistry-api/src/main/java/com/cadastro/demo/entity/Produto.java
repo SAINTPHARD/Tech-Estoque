@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "product")
+@Table(name = "product")	// Especifica o nome da tabela no banco de dados
 public class Produto {
 
 	@Id
@@ -19,32 +19,33 @@ public class Produto {
 	private Long id;
 
 	@Column(name = "name", nullable = false, length = 100)
-	private String nome;
+	private String name;
 
-	@Column(name = "description")
-	private String descricao;
+	@Column(name = "description", nullable = false, length = 255)
+	private String description;
 
 	@Column(name = "category", nullable = false, length = 100)
-	private String categoria;
+	private String category;
 
 	@Column(name = "price", nullable = false, precision = 10, scale = 2)
-	private BigDecimal preco;
+	private BigDecimal price;
 
 	@Column(name = "quantity", nullable = false)
-	private Integer quantidade;
+	private Integer quantity;
 
 	public Produto() {
 	}
 
 	public Produto(Long id, String nome, String descricao, String categoria, BigDecimal preco, Integer quantidade) {
 		this.id = id;
-		this.nome = nome;
-		this.descricao = descricao;
-		this.categoria = categoria;
-		this.preco = preco;
-		this.quantidade = quantidade;
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.price = price;
+        this.quantity = quantity;
 	}
 
+	// Getters e Setters permite acessar e modificar os campos privados da classe Produto, garantindo o encapsulamento dos dados.
 	public Long getId() {
 		return id;
 	}
@@ -53,44 +54,44 @@ public class Produto {
 		this.id = id;
 	}
 
-	public String getNome() {
-		return nome;
+	public String getName() {
+		return name;
 	}
 
-	public void setNome(String nome) {
-		this.nome = nome;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public String getDescricao() {
-		return descricao;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setDescricao(String descricao) {
-		this.descricao = descricao;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
-	public String getCategoria() {
-		return categoria;
+	public String getCategory() {
+		return category;
 	}
 
-	public void setCategoria(String categoria) {
-		this.categoria = categoria;
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
-	public BigDecimal getPreco() {
-		return preco;
+	public BigDecimal getPrice() {
+		return price;
 	}
 
-	public void setPreco(BigDecimal preco) {
-		this.preco = preco;
+	public void setPrice(BigDecimal price) {
+		this.price = price;
 	}
 
-	public Integer getQuantidade() {
-		return quantidade;
+	public Integer getQuantity() {
+		return quantity;
 	}
 
-	public void setQuantidade(Integer quantidade) {
-		this.quantidade = quantidade;
+	public void setQuantity(Integer quantity) {
+		this.quantity = quantity;
 	}
 
 	@Override
