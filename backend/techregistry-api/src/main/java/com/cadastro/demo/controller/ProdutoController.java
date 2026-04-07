@@ -39,7 +39,7 @@ public class ProdutoController {
 		ProdutoResponseDTO created = service.salvar(dto);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 				.path("/{id}")
-				.buildAndExpand(created.id())
+				.buildAndExpand(created.getId())
 				.toUri();
 		return ResponseEntity.created(location).body(created);
 	}

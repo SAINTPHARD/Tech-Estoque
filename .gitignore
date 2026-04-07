@@ -1,6 +1,7 @@
 # Node
 node_modules
-dist
+dist/
+.env
 
 # Java
 target/
@@ -20,11 +21,3 @@ data/
 
 # Logs
 *.log
-# --- Frontend (Ignorar por enquanto) ---
-techregistry-web/
-
-# --- Java/Maven ---
-backend/techregistry-api/target/
-backend/techregistry-api/.mvn/
-backend/techregistry-api/mvnw
-backend/techregistry-api/mvnw.cmd

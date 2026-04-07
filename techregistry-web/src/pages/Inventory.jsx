@@ -1,14 +1,16 @@
 /**
  * Arquivo: src/pages/Inventory.jsx
  * Responsabilidade: reunir o fluxo completo de gestao do estoque.
- * O que voce encontra aqui: formularios, filtros, tabela e feedbacks de erro ou sucesso.
+ * O que voce encontra aqui: formularios, filtros, tabela, feedbacks e exportacao em PDF.
  * Quando mexer: use esta pagina quando o CRUD principal de produtos mudar.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import PdfExportMenu from '../components/common/PdfExportMenu';
 import InventoryStats from '../components/dashboard/InventoryStats';
 import ProductForm from '../components/dashboard/ProductForm';
 import ProductTable from '../components/dashboard/ProductTable';
+import { PDF_EXPORT_OPTIONS, exportProductsPdf } from '../utils/pdfExporter';
 import {
   STOCK_STATUS_OPTIONS,
   buildCategoryOptions,
@@ -41,6 +43,7 @@ export default function Inventory({
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [stockFilter, setStockFilter] = useState('all');
+  const [exportFeedback, setExportFeedback] = useState(null);
 
   const categoryOptions = useMemo(() => buildCategoryOptions(products), [products]);
   const filteredProducts = useMemo(
@@ -58,6 +61,15 @@ export default function Inventory({
     [filteredProducts]
   );
 
+  useEffect(() => {
+    if (!exportFeedback) {
+      return undefined;
+    }
+
+    const timer = window.setTimeout(() => setExportFeedback(null), 4500);
+    return () => window.clearTimeout(timer);
+  }, [exportFeedback]);
+
   const hasFilters =
     searchTerm.trim() !== '' || categoryFilter !== 'all' || stockFilter !== 'all';
 
@@ -69,6 +81,34 @@ export default function Inventory({
     setSearchTerm('');
     setCategoryFilter('all');
     setStockFilter('all');
+  };
+
+  const handleExportPdf = (format) => {
+    try {
+      const fileName = exportProductsPdf({
+        format,
+        products: filteredProducts,
+        allProducts: products,
+        filters: {
+          searchTerm,
+          categoryFilter,
+          stockFilter,
+        },
+      });
+
+      setExportFeedback({
+        type: 'success',
+        text: `Arquivo ${fileName} baixado com sucesso.`,
+        hint: 'Formatos disponiveis: resumo executivo, inventario atual e reposicao urgente.',
+      });
+    } catch (exportError) {
+      console.error('Erro ao exportar PDF:', exportError);
+      setExportFeedback({
+        type: 'error',
+        text: 'Nao foi possivel gerar o PDF agora.',
+        hint: 'Verifique se existem dados validos e tente novamente.',
+      });
+    }
   };
 
   return (
@@ -91,6 +131,15 @@ export default function Inventory({
           <div>
             <strong>{feedback.text}</strong>
             {feedback.hint ? <p>{feedback.hint}</p> : null}
+          </div>
+        </div>
+      ) : null}
+
+      {exportFeedback ? (
+        <div className={`notice notice-${exportFeedback.type}`}>
+          <div>
+            <strong>{exportFeedback.text}</strong>
+            {exportFeedback.hint ? <p>{exportFeedback.hint}</p> : null}
           </div>
         </div>
       ) : null}
@@ -153,11 +202,19 @@ export default function Inventory({
             </p>
           </div>
 
-          {hasFilters ? (
-            <button type="button" className="secondary-button" onClick={clearFilters}>
-              Limpar filtros
-            </button>
-          ) : null}
+          <div className="panel-header-actions">
+            {hasFilters ? (
+              <button type="button" className="secondary-button" onClick={clearFilters}>
+                Limpar filtros
+              </button>
+            ) : null}
+
+            <PdfExportMenu
+              options={PDF_EXPORT_OPTIONS}
+              disabled={loading || !products.length}
+              onSelect={handleExportPdf}
+            />
+          </div>
         </div>
 
         <div className="inventory-toolbar">

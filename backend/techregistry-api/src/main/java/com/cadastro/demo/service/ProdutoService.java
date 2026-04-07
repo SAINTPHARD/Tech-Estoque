@@ -82,9 +82,9 @@ public class ProdutoService {
 	}
 
 	private void aplicarDados(Produto produto, ProdutoRequestDTO dto) {
-		produto.setName(dto.nome().trim());
-		produto.setCategory(dto.categoria().trim());
-		produto.setPrice(dto.preco());
-		produto.setQuantity(dto.quantidade());
+		produto.setName(dto.getNome().trim());
+		produto.setCategory(dto.getCategoria().trim());
+		produto.setPrice(dto.getPreco());
+		produto.setQuantity(dto.getQuantidade());
 	}
 }

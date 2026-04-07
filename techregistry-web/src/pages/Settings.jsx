@@ -51,6 +51,12 @@ export default function Settings({ products, loading, onRefresh }) {
           <strong>{loading ? '...' : stats.totalProducts}</strong>
           <p>Quantidade atual recebida da API.</p>
         </article>
+
+        <article className="settings-card">
+          <span>Acesso</span>
+          <strong>Log-in do operador</strong>
+          <p>Atalho visual pronto para conectar autenticacao quando o backend tiver esse fluxo.</p>
+        </article>
       </div>
 
       <section className="panel">

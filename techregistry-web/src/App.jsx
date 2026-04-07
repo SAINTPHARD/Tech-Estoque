@@ -1,11 +1,11 @@
 /**
  * Arquivo: src/App.jsx
  * Responsabilidade: montar a casca principal da aplicacao.
- * O que voce encontra aqui: layout base, navegacao entre paginas e integracao com o hook de produtos.
+ * O que voce encontra aqui: layout base, navegacao entre paginas, controle da sidebar e integracao com o hook de produtos.
  * Quando mexer: altere este arquivo quando a estrutura global do app mudar.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Footer from './components/layout/Footer/Footer';
 import Header from './components/layout/Header/Header';
 import Sidebar from './components/layout/Sidebar/Sidebar';
@@ -16,6 +16,8 @@ import Inventory from './pages/Inventory';
 import Settings from './pages/Settings';
 import './styles/dashboard.css';
 
+const SIDEBAR_BREAKPOINT = 1100;
+
 const pageMap = {
   dashboard: {
     title: 'Dashboard',
@@ -23,15 +25,23 @@ const pageMap = {
   },
   inventory: {
     title: 'Estoque',
-    description: 'Cadastre, edite e acompanhe a quantidade de cada item.',
+    description: 'Cadastre, edite, exporte e acompanhe a quantidade de cada item.',
   },
   settings: {
     title: 'Configuracoes',
-    description: 'Resumo tecnico da integracao e do ambiente atual.',
+    description: 'Resumo tecnico da integracao, exportacao e atalhos do ambiente atual.',
   },
 };
 
 const allowedSections = Object.keys(pageMap);
+
+function getIsCompactLayout() {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  return window.innerWidth <= SIDEBAR_BREAKPOINT;
+}
 
 function resolvePageComponent(section, props) {
   // Decide qual pagina deve ser mostrada conforme a secao ativa.
@@ -49,17 +59,59 @@ function resolvePageComponent(section, props) {
 export default function App() {
   const [activeSection, setActiveSection] = useActiveSection('dashboard', allowedSections);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isCompactLayout, setIsCompactLayout] = useState(getIsCompactLayout);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const { products, loading, saving, deleteId, error, feedback, actions } = useProducts();
+
+  useEffect(() => {
+    // Mantem o layout coerente ao trocar entre desktop, tablet e mobile.
+    const handleResize = () => {
+      const nextCompactLayout = getIsCompactLayout();
+      setIsCompactLayout(nextCompactLayout);
+
+      if (nextCompactLayout) {
+        setIsSidebarCollapsed(false);
+        return;
+      }
+
+      setIsMobileSidebarOpen(false);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const currentPage = pageMap[activeSection] ?? pageMap.dashboard;
 
+  const closeMobileSidebar = () => {
+    setIsMobileSidebarOpen(false);
+  };
+
   const handleSelectSection = (section) => {
     setActiveSection(section);
+
+    if (isCompactLayout) {
+      closeMobileSidebar();
+    }
+  };
+
+  const handleOpenSidebar = () => {
+    setIsMobileSidebarOpen(true);
+  };
+
+  const handleToggleSidebarCollapse = () => {
+    setIsSidebarCollapsed((currentValue) => !currentValue);
+  };
+
+  const handleLoginShortcut = () => {
+    // Enquanto nao existe autentificacao real, o atalho leva para a area tecnica de acesso.
+    handleSelectSection('settings');
   };
 
   const handleStartEdit = (product) => {
     setEditingProduct(product);
-    setActiveSection('inventory');
+    handleSelectSection('inventory');
   };
 
   const handleCancelEdit = () => {
@@ -111,8 +163,23 @@ export default function App() {
   };
 
   return (
-    <div className="app-shell">
-      <Sidebar activeSection={activeSection} onSelectSection={handleSelectSection} />
+    <div
+      className={[
+        'app-shell',
+        isCompactLayout ? 'is-compact-layout' : '',
+        isSidebarCollapsed && !isCompactLayout ? 'is-sidebar-collapsed' : '',
+      ].filter(Boolean).join(' ')}
+    >
+      <Sidebar
+        activeSection={activeSection}
+        onSelectSection={handleSelectSection}
+        isCollapsed={isSidebarCollapsed}
+        isCompactLayout={isCompactLayout}
+        isMobileSidebarOpen={isMobileSidebarOpen}
+        onCloseMobileSidebar={closeMobileSidebar}
+        onToggleSidebarCollapse={handleToggleSidebarCollapse}
+        onLoginShortcut={handleLoginShortcut}
+      />
 
       <div className="app-body">
         <Header
@@ -120,6 +187,10 @@ export default function App() {
           description={currentPage.description}
           productCount={products.length}
           loading={loading}
+          isCompactLayout={isCompactLayout}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onOpenSidebar={handleOpenSidebar}
+          onToggleSidebarCollapse={handleToggleSidebarCollapse}
           onRefresh={actions.refreshProducts}
         />
 

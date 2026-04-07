@@ -8,7 +8,7 @@
 import api from './api';
 
 // Caminho base usado por todos os endpoints de produto.
-const PRODUCT_PATH = '/produtos';
+const PRODUCT_PATH = '/products';
 
 /**
  * Busca todos os produtos cadastrados no backend.
