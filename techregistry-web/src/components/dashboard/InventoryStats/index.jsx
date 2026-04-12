@@ -5,8 +5,8 @@
  * Quando mexer: ajuste este arquivo quando os KPIs do dashboard mudarem.
  */
 
-import { formatCurrency } from '../../utils/currencyFormatter';
-import { buildInventoryStats } from '../../utils/productHelpers';
+import { formatCurrency } from '../../../utils/currencyFormatter';
+import { buildInventoryStats } from '../../../utils/productHelpers';
 
 function StatSkeleton() {
   return (

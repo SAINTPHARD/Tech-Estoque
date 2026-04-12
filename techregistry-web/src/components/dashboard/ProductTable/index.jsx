@@ -5,11 +5,11 @@
  * Quando mexer: use este arquivo quando a listagem principal do inventario mudar.
  */
 
-import DeleteButton from '../common/DeleteButton';
-import EditButton from '../common/EditButton';
-import { formatCurrency } from '../../utils/currencyFormatter';
-import { getStockStatus } from '../../utils/productHelpers';
-import './ProductTable.css';
+import DeleteButton from '../../common/DeleteButton';
+import EditButton from '../../common/EditButton';
+import { formatCurrency } from '../../../utils/currencyFormatter';
+import { getStockStatus } from '../../../utils/productHelpers';
+import './style.css';
 
 function TableSkeleton({ showActions }) {
   // Mantem a estrutura visual da tabela enquanto os dados ainda estao carregando.

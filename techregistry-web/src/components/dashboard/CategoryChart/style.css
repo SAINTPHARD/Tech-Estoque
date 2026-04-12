@@ -8,13 +8,13 @@
 .category-chart-shell {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .category-chart-placeholder {
-  min-height: 280px;
+  min-height: 220px;
   border-radius: 24px;
-  border: 1px dashed #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.24);
   background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
   display: grid;
   place-content: center;
@@ -22,11 +22,11 @@
 }
 
 .category-chart-empty {
-  min-height: 280px;
+  min-height: 220px;
   justify-content: center;
   align-items: center;
   text-align: center;
-  border: 1px dashed #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 24px;
   background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
 }

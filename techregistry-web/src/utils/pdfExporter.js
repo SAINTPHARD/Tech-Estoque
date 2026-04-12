@@ -5,32 +5,32 @@
  * Quando mexer: altere este arquivo quando os formatos de relatorio mudarem.
  */
 
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { formatCurrency } from './currencyFormatter';
-import { formatDateTime } from './datePicker';
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
+import { formatCurrency } from "./currencyFormatter";
+import { formatDateTime } from "./datePicker";
 import {
   buildCategoryChartData,
   buildInventoryStats,
   getStockStatus,
   sortProducts,
-} from './productHelpers';
+} from "./productHelpers";
 
 export const PDF_EXPORT_OPTIONS = [
   {
-    id: 'summary',
-    label: 'Resumo executivo',
-    description: 'Indicadores, categorias e destaques.',
+    id: "summary",
+    label: "Resumo executivo",
+    description: "Indicadores, categorias e destaques.",
   },
   {
-    id: 'inventory',
-    label: 'Inventario atual',
-    description: 'Tabela completa da visao filtrada.',
+    id: "inventory",
+    label: "Inventario atual",
+    description: "Tabela completa da visao filtrada.",
   },
   {
-    id: 'critical',
-    label: 'Reposicao urgente',
-    description: 'Itens em status critico ou atencao.',
+    id: "critical",
+    label: "Reposicao urgente",
+    description: "Itens em status critico ou atencao.",
   },
 ];
 
@@ -45,25 +45,25 @@ function buildFilterSummary(filters = {}) {
     summary.push(`Busca: ${filters.searchTerm.trim()}`);
   }
 
-  if (filters.categoryFilter && filters.categoryFilter !== 'all') {
+  if (filters.categoryFilter && filters.categoryFilter !== "all") {
     summary.push(`Categoria: ${filters.categoryFilter}`);
   }
 
-  if (filters.stockFilter && filters.stockFilter !== 'all') {
+  if (filters.stockFilter && filters.stockFilter !== "all") {
     summary.push(`Status: ${filters.stockFilter}`);
   }
 
-  return summary.length ? summary.join(' | ') : 'Sem filtros aplicados.';
+  return summary.length ? summary.join(" | ") : "Sem filtros aplicados.";
 }
 
 function buildProductRows(products = []) {
-  return sortProducts(products, 'name').map((product) => {
+  return sortProducts(products, "name").map((product) => {
     const stockStatus = getStockStatus(product.quantidade);
 
     return [
       `#${product.id}`,
       product.nome,
-      product.categoria || 'Sem categoria',
+      product.categoria || "Sem categoria",
       formatCurrency(product.preco),
       String(product.quantidade),
       stockStatus.label,
@@ -74,15 +74,15 @@ function buildProductRows(products = []) {
 
 function createDocument(format) {
   return new jsPDF({
-    orientation: format === 'summary' ? 'portrait' : 'landscape',
-    unit: 'mm',
-    format: 'a4',
+    orientation: format === "summary" ? "portrait" : "landscape",
+    unit: "mm",
+    format: "a4",
   });
 }
 
 function drawHeader(doc, title, subtitle) {
   doc.setFillColor(15, 23, 42);
-  doc.roundedRect(14, 12, 182, 28, 8, 8, 'F');
+  doc.roundedRect(14, 12, 182, 28, 8, 8, "F");
   doc.setTextColor(248, 250, 252);
   doc.setFontSize(18);
   doc.text(title, 20, 24);
@@ -94,7 +94,7 @@ function drawHeader(doc, title, subtitle) {
 function drawSummaryCard(doc, { title, value, helper, x, y, width }) {
   doc.setFillColor(248, 250, 252);
   doc.setDrawColor(219, 228, 240);
-  doc.roundedRect(x, y, width, 28, 6, 6, 'FD');
+  doc.roundedRect(x, y, width, 28, 6, 6, "FD");
   doc.setFontSize(9);
   doc.setTextColor(71, 85, 105);
   doc.text(title, x + 4, y + 7);
@@ -110,34 +110,34 @@ function exportSummaryDocument(doc, { products, allProducts, filters }) {
   const stats = buildInventoryStats(products);
   const baseStats = buildInventoryStats(allProducts);
   const categories = buildCategoryChartData(products);
-  const topProducts = sortProducts(products, 'value-desc').slice(0, 5);
+  const topProducts = sortProducts(products, "value-desc").slice(0, 5);
 
   drawHeader(
     doc,
-    'Resumo executivo do estoque',
-    `Gerado em ${formatDateTime()} | ${buildFilterSummary(filters)}`
+    "Resumo executivo do estoque",
+    `Gerado em ${formatDateTime()} | ${buildFilterSummary(filters)}`,
   );
 
   const cards = [
     {
-      title: 'Produtos visiveis',
+      title: "Produtos visiveis",
       value: stats.totalProducts,
       helper: `Base completa com ${baseStats.totalProducts} itens cadastrados.`,
     },
     {
-      title: 'Unidades',
+      title: "Unidades",
       value: stats.totalUnits,
-      helper: 'Volume total da visao exportada.',
+      helper: "Volume total da visao exportada.",
     },
     {
-      title: 'Valor em estoque',
+      title: "Valor em estoque",
       value: formatCurrency(stats.totalValue),
-      helper: 'Patrimonio estimado do recorte atual.',
+      helper: "Patrimonio estimado do recorte atual.",
     },
     {
-      title: 'Itens criticos',
+      title: "Itens criticos",
       value: stats.criticalProducts,
-      helper: 'Produtos que pedem reposicao imediata.',
+      helper: "Produtos que pedem reposicao imediata.",
     },
   ];
 
@@ -152,15 +152,15 @@ function exportSummaryDocument(doc, { products, allProducts, filters }) {
 
   autoTable(doc, {
     startY: 84,
-    head: [['Categoria', 'Produtos', 'Unidades']],
+    head: [["Categoria", "Produtos", "Unidades"]],
     body: categories.length
       ? categories.map((item) => [
           item.categoria,
           String(item.quantidadeProdutos),
           String(item.totalUnidades),
         ])
-      : [['Sem dados', '0', '0']],
-    theme: 'grid',
+      : [["Sem dados", "0", "0"]],
+    theme: "grid",
     headStyles: {
       fillColor: [37, 99, 235],
     },
@@ -172,16 +172,16 @@ function exportSummaryDocument(doc, { products, allProducts, filters }) {
 
   autoTable(doc, {
     startY: doc.lastAutoTable.finalY + 8,
-    head: [['Produto', 'Categoria', 'Status', 'Valor total']],
+    head: [["Produto", "Categoria", "Status", "Valor total"]],
     body: topProducts.length
       ? topProducts.map((product) => [
           product.nome,
-          product.categoria || 'Sem categoria',
+          product.categoria || "Sem categoria",
           getStockStatus(product.quantidade).label,
           formatCurrency(product.preco * product.quantidade),
         ])
-      : [['Sem produtos', '-', '-', '-']],
-    theme: 'striped',
+      : [["Sem produtos", "-", "-", "-"]],
+    theme: "striped",
     headStyles: {
       fillColor: [15, 23, 42],
     },
@@ -196,22 +196,28 @@ function exportTableDocument(doc, { title, products, filters }) {
   drawHeader(
     doc,
     title,
-    `Gerado em ${formatDateTime()} | ${buildFilterSummary(filters)}`
+    `Gerado em ${formatDateTime()} | ${buildFilterSummary(filters)}`,
   );
 
   const body = buildProductRows(products);
 
   if (!body.length) {
     doc.setFontSize(12);
-    doc.text('Nenhum produto encontrado para este formato de exportacao.', 20, 56);
+    doc.text(
+      "Nenhum produto encontrado para este formato de exportacao.",
+      20,
+      56,
+    );
     return;
   }
 
   autoTable(doc, {
     startY: 50,
-    head: [['ID', 'Produto', 'Categoria', 'Preco', 'Qtd', 'Status', 'Valor total']],
+    head: [
+      ["ID", "Produto", "Categoria", "Preco", "Qtd", "Status", "Valor total"],
+    ],
     body,
-    theme: 'striped',
+    theme: "striped",
     headStyles: {
       fillColor: [37, 99, 235],
     },
@@ -224,7 +230,7 @@ function exportTableDocument(doc, { title, products, filters }) {
 }
 
 export function exportProductsPdf({
-  format = 'inventory',
+  format = "inventory",
   products = [],
   allProducts = products,
   filters = {},
@@ -233,24 +239,24 @@ export function exportProductsPdf({
   const visibleProducts = sortProducts(products);
   const criticalProducts = visibleProducts.filter((product) => {
     const stockStatus = getStockStatus(product.quantidade).id;
-    return stockStatus === 'critical' || stockStatus === 'warning';
+    return stockStatus === "critical" || stockStatus === "warning";
   });
 
-  if (format === 'summary') {
+  if (format === "summary") {
     exportSummaryDocument(doc, {
       products: visibleProducts,
       allProducts,
       filters,
     });
-  } else if (format === 'critical') {
+  } else if (format === "critical") {
     exportTableDocument(doc, {
-      title: 'Relatorio de reposicao urgente',
+      title: "Relatorio de reposicao urgente",
       products: criticalProducts,
       filters,
     });
   } else {
     exportTableDocument(doc, {
-      title: 'Relatorio do inventario atual',
+      title: "Relatorio do inventario atual",
       products: visibleProducts,
       filters,
     });
@@ -258,5 +264,6 @@ export function exportProductsPdf({
 
   const fileName = `techregistry-${format}-${buildFileStamp()}.pdf`;
   doc.save(fileName);
+  // Retorna o nome do arquivo para que a pagina de estoque possa exibir o nome correto.
   return fileName;
 }

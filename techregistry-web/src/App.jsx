@@ -6,11 +6,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import Footer from './components/layout/Footer/Footer';
-import Header from './components/layout/Header/Header';
-import Sidebar from './components/layout/Sidebar/Sidebar';
+import Footer from './components/layout/Footer';
+import Header from './components/layout/Header';
+import Sidebar from './components/layout/Sidebar';
 import useActiveSection from './hooks/useActiveSection';
 import useProducts from './hooks/useProducts';
+import { exportProductsPdf } from './utils/pdfExporter';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
 import Settings from './pages/Settings';
@@ -83,6 +84,25 @@ export default function App() {
   }, []);
 
   const currentPage = pageMap[activeSection] ?? pageMap.dashboard;
+  // Usa os metadados da pagina ativa para ajustar titulo e descricao no header.
+
+  const handleDownloadReport = () => {
+    if (activeSection !== 'inventory' || products.length === 0) {
+      return;
+    }
+
+    exportProductsPdf({
+      format: 'inventory',
+      products,
+      allProducts: products,
+      filters: {},
+    });
+  };
+
+  const handleNotificationClick = () => {
+    // Placeholder para futura area de notificações.
+    window.alert('Nenhuma notificação disponível no momento.');
+  };
 
   const closeMobileSidebar = () => {
     setIsMobileSidebarOpen(false);
@@ -185,13 +205,15 @@ export default function App() {
         <Header
           title={currentPage.title}
           description={currentPage.description}
-          productCount={products.length}
           loading={loading}
+          downloadDisabled={loading || products.length === 0}
           isCompactLayout={isCompactLayout}
           isSidebarCollapsed={isSidebarCollapsed}
           onOpenSidebar={handleOpenSidebar}
           onToggleSidebarCollapse={handleToggleSidebarCollapse}
           onRefresh={actions.refreshProducts}
+          onDownloadReport={activeSection === 'inventory' ? handleDownloadReport : undefined}
+          onNotification={handleNotificationClick}
         />
 
         <main className="app-main">

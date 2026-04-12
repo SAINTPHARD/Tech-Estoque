@@ -7,7 +7,7 @@
 
 import { LoaderCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import './ProductForm.css';
+import './style.css';
 
 const emptyForm = {
   nome: '',

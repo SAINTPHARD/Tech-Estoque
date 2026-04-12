@@ -6,9 +6,10 @@
  */
 
 import { SquarePen } from 'lucide-react';
-import './EditButton.css';
+import './style.css';
 
 export default function EditButton({ onClick, disabled = false }) {
+  // Botão de edição simples com ícone, usado em cada linha da tabela.
   return (
     <button
       type="button"

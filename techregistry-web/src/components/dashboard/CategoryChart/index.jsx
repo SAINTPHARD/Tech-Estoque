@@ -14,8 +14,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { buildCategoryChartData } from '../../utils/productHelpers';
-import './CategoryChart.css';
+import { buildCategoryChartData } from '../../../utils/productHelpers';
+import './style.css';
 
 export default function CategoryChart({ products = [], loading = false }) {
   // Converte a lista bruta em um formato pronto para o grafico.
@@ -44,8 +44,8 @@ export default function CategoryChart({ products = [], loading = false }) {
 
   return (
     <div className="category-chart-shell">
-      <ResponsiveContainer width="100%" height={280}>
-        <BarChart data={chartData} margin={{ top: 6, right: 8, left: -20, bottom: 0 }}>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart data={chartData} margin={{ top: 4, right: 6, left: -16, bottom: 0 }}>
           <CartesianGrid vertical={false} strokeDasharray="4 4" stroke="#dbe4f0" />
           <XAxis
             dataKey="categoria"

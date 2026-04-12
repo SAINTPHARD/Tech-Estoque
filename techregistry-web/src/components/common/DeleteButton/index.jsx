@@ -6,7 +6,7 @@
  */
 
 import { LoaderCircle, Trash2 } from 'lucide-react';
-import './DeleteButton.css';
+import './style.css';
 
 export default function DeleteButton({ onConfirm, itemName = 'item', busy = false }) {
   const handleDelete = async () => {
@@ -21,6 +21,7 @@ export default function DeleteButton({ onConfirm, itemName = 'item', busy = fals
       return;
     }
 
+    // Se o usuario confirmou, chama a funcao de exclusao passada pelo componente pai.
     await onConfirm();
   };
 

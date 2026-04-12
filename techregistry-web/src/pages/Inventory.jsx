@@ -6,8 +6,10 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { Download } from 'lucide-react';
 import PdfExportMenu from '../components/common/PdfExportMenu';
 import InventoryStats from '../components/dashboard/InventoryStats';
+import CategoryChart from '../components/dashboard/CategoryChart';
 import ProductForm from '../components/dashboard/ProductForm';
 import ProductTable from '../components/dashboard/ProductTable';
 import { PDF_EXPORT_OPTIONS, exportProductsPdf } from '../utils/pdfExporter';
@@ -144,6 +146,22 @@ export default function Inventory({
         </div>
       ) : null}
 
+      <div className="dashboard-alert-wrapper">
+        {filteredStats.criticalProducts > 0 ? (
+          <div className="dashboard-alert">
+            <strong>Atenção:</strong>
+            <p>
+              {`Existem ${filteredStats.criticalProducts} produtos em nível crítico neste recorte. Priorize reposição.`}
+            </p>
+          </div>
+        ) : (
+          <div className="dashboard-alert dashboard-alert-ok">
+            <strong>Estoque saudável</strong>
+            <p>O recorte atual não mostra itens críticos. Continue monitorando os filtros.</p>
+          </div>
+        )}
+      </div>
+
       <div className="inventory-forms">
         <section className="panel">
           <div className="panel-header">
@@ -161,34 +179,46 @@ export default function Inventory({
           />
         </section>
 
-        <section className="panel">
-          <div className="panel-header">
-            <div>
-              <span className="panel-kicker">Edicao</span>
-              <h3>{editingProduct ? `Editando #${editingProduct.id}` : 'Selecione um produto'}</h3>
-              <p>
-                {editingProduct
-                  ? 'Atualize nome, categoria, preco e quantidade sem sair da pagina.'
-                  : 'Clique em editar na tabela para carregar o formulario de atualizacao.'}
-              </p>
-            </div>
-          </div>
+        {editingProduct ? (
+          <section className="panel">
+            <div className="panel-header">
+              <div>
+                <span className="panel-kicker">Editar produto</span>
+                <h3>{editingProduct.nome}</h3>
+                <p>Atualize os dados do produto selecionado.</p>
+              </div>
 
-          {editingProduct ? (
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={onCancelEdit}
+                disabled={editBusy}
+              >
+                Cancelar edição
+              </button>
+            </div>
+
             <ProductForm
               initialValues={editingProduct}
               onSubmit={onUpdateProduct}
-              submitLabel="Salvar alteracoes"
+              submitLabel="Salvar alterações"
               busy={editBusy}
               onCancel={onCancelEdit}
             />
-          ) : (
-            <div className="empty-panel">
-              <strong>Nenhum produto em edicao.</strong>
-              <p>Quando voce selecionar um item da tabela, o formulario aparece aqui.</p>
+          </section>
+        ) : (
+          <section className="panel">
+            <div className="panel-header">
+              <div>
+                <span className="panel-kicker">Visão do estoque</span>
+                <h3>Distribuição de categorias</h3>
+                <p>Gráfico de produtos por categoria exibido em tempo real.</p>
+              </div>
             </div>
-          )}
-        </section>
+
+            <CategoryChart products={filteredProducts} loading={loading} />
+          </section>
+        )}
       </div>
 
       <section className="panel">

@@ -5,19 +5,21 @@
  * Quando mexer: altere este arquivo se a faixa superior da aplicacao mudar.
  */
 
-import { CalendarDays, Menu, PanelLeftClose, PanelLeftOpen, RefreshCw } from 'lucide-react';
+import { Bell, CalendarDays, Download, Menu, PanelLeftClose, PanelLeftOpen, RefreshCw } from 'lucide-react';
 import { formatDateLabel, formatDateTime } from '../../../utils/datePicker';
 
 export default function Header({
   title,
   description,
-  productCount = 0,
   loading = false,
+  downloadDisabled = false,
   isCompactLayout = false,
   isSidebarCollapsed = false,
   onOpenSidebar,
   onToggleSidebarCollapse,
   onRefresh,
+  onDownloadReport,
+  onNotification,
 }) {
   return (
     <header className="layout-header">
@@ -26,6 +28,7 @@ export default function Header({
         <div className="header-leading">
           <div className="header-controls">
             {isCompactLayout ? (
+              // Se o layout estiver compacto, abre a sidebar como overlay.
               <button
                 type="button"
                 className="header-control-button"
@@ -55,14 +58,30 @@ export default function Header({
 
         <div className="header-meta">
           <div className="header-badge">
-            <strong>{productCount}</strong>
-            <span>produtos sincronizados</span>
-          </div>
-
-          <div className="header-badge">
             <CalendarDays size={16} />
             <span>{formatDateTime()}</span>
           </div>
+
+          {onDownloadReport && !isCompactLayout ? (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => onDownloadReport?.()}
+              disabled={downloadDisabled}
+            >
+              <Download size={16} />
+              Baixar relatório
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            className="secondary-button header-icon-button"
+            onClick={() => onNotification?.()}
+            aria-label="Notificações"
+          >
+            <Bell size={16} />
+          </button>
 
           <button
             type="button"

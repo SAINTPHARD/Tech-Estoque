@@ -18,6 +18,20 @@ export default function Dashboard({ products, loading, onSelectSection }) {
 
   return (
     <section className="page-shell">
+      <div className="dashboard-alert-wrapper">
+        {stats.criticalProducts > 0 ? (
+          <div className="dashboard-alert">
+            <strong>Atenção:</strong>
+            <p>{`Existem ${stats.criticalProducts} produtos em nível crítico. Verifique o estoque urgente.`}</p>
+          </div>
+        ) : (
+          <div className="dashboard-alert dashboard-alert-ok">
+            <strong>Estoque estável</strong>
+            <p>Todos os itens estão dentro dos limites esperados no momento.</p>
+          </div>
+        )}
+      </div>
+
       <div className="page-lead">
         <div>
           <span className="page-kicker">Visao executiva</span>

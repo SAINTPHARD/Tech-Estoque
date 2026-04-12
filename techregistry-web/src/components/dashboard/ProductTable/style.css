@@ -111,6 +111,12 @@
   color: #dc2626;
 }
 
+.status-badge-neutral {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
 .table-actions {
   display: flex;
   align-items: center;

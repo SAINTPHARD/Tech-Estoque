@@ -6,14 +6,17 @@
  */
 
 import {
+  AlertTriangle,
+  BarChart3,
   Boxes,
   ChevronLeft,
+  FileText,
   LayoutDashboard,
   LogIn,
   Settings2,
   X,
 } from 'lucide-react';
-import './Sidebar.css';
+import './style.css';
 
 const navigationItems = [
   {
@@ -117,6 +120,37 @@ export default function Sidebar({
               );
             })}
           </nav>
+
+          <div className="sidebar-insights">
+            <span className="sidebar-shortcuts-title">Painel rapido</span>
+
+            <button
+              type="button"
+              className="sidebar-insight"
+              onClick={() => onSelectSection?.('dashboard')}
+            >
+              <BarChart3 size={16} />
+              <span>Indicadores</span>
+            </button>
+
+            <button
+              type="button"
+              className="sidebar-insight"
+              onClick={() => onSelectSection?.('inventory')}
+            >
+              <FileText size={16} />
+              <span>Relatorios</span>
+            </button>
+
+            <button
+              type="button"
+              className="sidebar-insight"
+              onClick={() => onSelectSection?.('inventory')}
+            >
+              <AlertTriangle size={16} />
+              <span>Itens criticos</span>
+            </button>
+          </div>
 
           <div className="sidebar-shortcuts">
             <span className="sidebar-shortcuts-title">Atalhos rapidos</span>

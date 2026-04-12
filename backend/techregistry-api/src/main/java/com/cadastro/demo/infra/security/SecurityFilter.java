@@ -1,4 +1,5 @@
 package com.cadastro.demo.infra.security;
+
 /**
  * Classe de filtro de segurança para a aplicação. Esta classe pode ser usada para interceptar requisições HTTP e aplicar regras de segurança, como autenticação e autorização, antes que as requisições alcancem os controladores da aplicação.
  * <-- O Filtro que intercepta o Token,  JWT e valida a autenticação do usuário
@@ -24,46 +25,57 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
-    private final TokenService tokenService;
-    private final UsuarioRepository repository;
+	private final TokenService tokenService;
+	private final UsuarioRepository repository;
 
-    // Injeção via construtor (Boa prática OO)
-    public SecurityFilter(TokenService tokenService, UsuarioRepository repository) {
-        this.tokenService = tokenService;
-        this.repository = repository;
-    }
+	// Injeção via construtor (Boa prática OO)
+	public SecurityFilter(TokenService tokenService, UsuarioRepository repository) {
+		this.tokenService = tokenService;
+		this.repository = repository;
+	}
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        
-        // 1. Tenta recuperar o Token do cabeçalho
-        String tokenJWT = recuperarToken(request);
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+			throws ServletException, IOException {
 
-        if (tokenJWT != null) {
-            // 2. Valida o token e descobre o login do usuário
-            String login = tokenService.getSubject(tokenJWT);
-            
-            // 3. Busca o usuário no banco para garantir que ele ainda existe
-            UserDetails usuario = repository.findByLogin(login);
+		// 1. Tenta recuperar o Token
+		String tokenJWT = recuperarToken(request);
 
-            // 4. Autentica o usuário "forçadamente" no contexto do Spring para esta requisição
-            var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+		try {
+			if (tokenJWT != null) {
+				// 2. Valida o token
+				String login = tokenService.getSubject(tokenJWT);
 
-        // 5. Segue o fluxo para o próximo filtro ou para o Controller
-        filterChain.doFilter(request, response);
-    }
+				// 3. Busca o usuário
+				UserDetails usuario = repository.findByLogin(login);
 
-    private String recuperarToken(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        
-        if (authorizationHeader != null) {
-            // O padrão do cabeçalho é: "Bearer <token>"
-            return authorizationHeader.replace("Bearer ", "");
-        }
-        
-        return null;
-    }
+				if (usuario != null) {
+					// 4. Autentica no contexto do Spring
+					var authentication = new UsernamePasswordAuthenticationToken(usuario, null,
+							usuario.getAuthorities());
+					SecurityContextHolder.getContext().setAuthentication(authentication);
+				}
+			}
+		} catch (Exception e) {
+			// Se o token for inválido, expirado ou malformado, limpamos o contexto
+			// mas NÃO travamos a requisição. O login (que não tem token) precisa passar por
+			// aqui.
+			SecurityContextHolder.clearContext();
+		}
+
+		// 5. VITAL: Segue o fluxo. Se for /login, o Spring deixará passar
+		// porque configuramos .permitAll() lá na outra classe.
+		filterChain.doFilter(request, response);
+	}
+
+	private String recuperarToken(HttpServletRequest request) {
+		String authorizationHeader = request.getHeader("Authorization");
+
+		// Verificação robusta: evita NullPointerException e garante o prefixo Bearer
+		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+			return authorizationHeader.substring(7); // Remove "Bearer " (7 caracteres)
+		}
+
+		return null;
+	}
 }

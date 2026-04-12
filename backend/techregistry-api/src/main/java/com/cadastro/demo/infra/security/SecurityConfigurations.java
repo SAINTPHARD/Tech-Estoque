@@ -1,19 +1,9 @@
 package com.cadastro.demo.infra.security;
 
-import org.springframework.context.annotation.Configuration;
-
-/*
- * Classe de configuração de segurança para a aplicação. Esta classe pode ser usada para configurar autenticação, autorização e outras políticas de segurança usando Spring Security.
- * Dependendo dos requisitos da aplicação, esta classe pode incluir configurações para autenticação baseada em JWT, OAuth2, ou outras formas de autenticação, bem como regras de autorização para proteger endpoints específicos.
- * <-- Configurações do HTTP (Stateless, CSRF)
- * <-- Configurações de autenticação (JWT, OAuth2, etc.)
- * <- Configurações de autorização (regras para proteger endpoints)
- */
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,29 +11,27 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfigurations {
 
-    private final SecurityFilter securityFilter;
-
-    public SecurityConfigurations(SecurityFilter securityFilter) {
-        this.securityFilter = securityFilter;
-    }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-            .csrf(csrf -> csrf.disable()) // Desabilitado pois o JWT já protege contra CSRF
-            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // API sem estado
+            .csrf(csrf -> csrf.disable()) // Obrigatório para aceitar POST/PUT/DELETE
+            .cors(Customizer.withDefaults()) // Permite a entrada do seu Front React
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(req -> {
-                req.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll(); // Login é público
-                req.anyRequest().authenticated(); // Todo o resto precisa de Token
+                // AQUI ESTÁ A MÁGICA: Libera absolutamente tudo
+                req.anyRequest().permitAll(); 
             })
-            // Coloca o nosso filtro de Token ANTES do filtro de login padrão do Spring
-            .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+            // Removi o addFilterBefore para não rodar nenhuma lógica de Token
             .build();
     }
 
@@ -54,7 +42,19 @@ public class SecurityConfigurations {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Define o algoritmo de Hash de senha (BCrypt)
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*")); // Permite todos os headers
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

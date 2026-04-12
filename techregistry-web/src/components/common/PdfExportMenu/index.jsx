@@ -7,7 +7,7 @@
 
 import { ChevronDown, Download, FileText } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import './PdfExportMenu.css';
+import './style.css';
 
 export default function PdfExportMenu({ options = [], disabled = false, onSelect }) {
   const [isOpen, setIsOpen] = useState(false);
