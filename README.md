@@ -1,4 +1,4 @@
-#  Tech Estoque Fullstack
+#  techregistry
 
 Sistema fullstack para gerenciamento de produtos e estoque.
 
