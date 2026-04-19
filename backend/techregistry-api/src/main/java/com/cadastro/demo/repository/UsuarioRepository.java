@@ -1,22 +1,24 @@
 package com.cadastro.demo.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import com.cadastro.demo.entity.Usuario;
 
-/** * Classe de repositório para a entidade "Usuario". Esta classe pode ser usada para interagir com o banco de dados e realizar operações CRUD (Create, Read, Update, Delete) relacionadas aos usuários da aplicação.
- * Dependendo dos requisitos da aplicação, esta classe pode incluir métodos para salvar um novo usuário, buscar usuários por diferentes critérios (como ID, email, etc.), atualizar informações do usuário e excluir usuários do banco de dados.
- * <-- Salvar Usuário
- * <-- Buscar Usuário por ID
- * <-- Buscar Usuário por Email
- * <-- Atualizar Usuário
- * <-- Excluir Usuário
+/**
+ * UsuarioRepository
+ * -----------------
+ * Repositório Spring Data JPA para a entidade Usuario.
+ * O Spring implementa automaticamente métodos de consulta baseados no nome,
+ * por exemplo findByLogin será implementado automaticamente e executará a
+ * consulta WHERE login = :login.
  */
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
-	// Método personalizado para buscar um usuário pelo login (email)
-	// O Spring Data JPA irá implementar automaticamente este método com base na convenção de nomenclatura
-	UserDetails findByLogin(String login);
+    /**
+     * Busca um usuário pelo login (usuário/email). Retorna o objeto Usuario
+     * que implementa UserDetails. O Spring Data gera a implementação
+     * automaticamente com base no nome do método.
+     */
+    Usuario findByLogin(String login);
 
 }

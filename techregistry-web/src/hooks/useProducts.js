@@ -1,63 +1,87 @@
 /**
  * Arquivo: src/hooks/useProducts.js
  * Responsabilidade: concentrar a logica de leitura e escrita de produtos no frontend.
- * O que voce encontra aqui: carregamento inicial, cadastro, edicao, exclusao e mensagens de feedback.
+ * O que voce encontra aqui: carregamento inicial, cadastro, edicao, exclusao, importacao e feedbacks.
  * Quando mexer: use este hook quando a regra de negocio do inventario mudar na camada React.
  */
 
-import { useCallback, useEffect, useState } from "react";
-import { buildApiErrorFeedback } from "../services/api";
+import { useCallback, useEffect, useState } from 'react';
+import { buildApiErrorFeedback } from '../services/api';
 import {
   createProduct,
   deleteProduct,
   getAllProducts,
   updateProduct,
-} from "../services/productService";
+} from '../services/productService';
 import {
+  normalizeProduct,
   normalizeProducts,
   removeProduct,
   sortProducts,
   upsertProduct,
-} from "../utils/productHelpers";
+} from '../utils/productHelpers';
 
 function buildSuccessFeedback(type, productName) {
-  // Padroniza as mensagens de sucesso para criar e editar.
-  if (type === "update") {
+  if (type === 'update') {
     return {
-      type: "success",
+      type: 'success',
       text: `As informacoes de "${productName}" foram atualizadas.`,
     };
   }
 
   return {
-    type: "success",
+    type: 'success',
     text: `Produto "${productName}" cadastrado com sucesso.`,
   };
+}
+
+function isValidProductPayload(product = {}) {
+  return (
+    Boolean(product.nome) &&
+    Boolean(product.categoria) &&
+    Number.isFinite(product.preco) &&
+    product.preco > 0 &&
+    Number.isInteger(product.quantidade) &&
+    product.quantidade >= 0
+  );
 }
 
 export default function useProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [error, setError] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
 
   const refreshProducts = useCallback(async (showLoader = true) => {
-    // Busca a lista mais recente na API e atualiza o estado principal.
     if (showLoader) {
       setLoading(true);
     }
 
     try {
       const data = await getAllProducts();
-      setProducts(sortProducts(Array.isArray(data) ? data : []));
+      const normalizedData = sortProducts(Array.isArray(data) ? data : []);
+
+      setProducts(normalizedData);
       setLastUpdated(new Date());
       setError(null);
+
+      return {
+        ok: true,
+        data: normalizedData,
+      };
     } catch (requestError) {
-      console.error("Erro ao carregar produtos:", requestError);
-      setError(buildApiErrorFeedback(requestError, "/produtos"));
+      console.error('Erro ao carregar produtos:', requestError);
+      const nextError = buildApiErrorFeedback(requestError, '/products');
+      setError(nextError);
+
+      return {
+        ok: false,
+        error: nextError,
+      };
     } finally {
       if (showLoader) {
         setLoading(false);
@@ -66,7 +90,6 @@ export default function useProducts() {
   }, []);
 
   useEffect(() => {
-    // Carrega os produtos assim que o hook entra em uso pela primeira vez.
     void refreshProducts();
   }, [refreshProducts]);
 
@@ -80,19 +103,21 @@ export default function useProducts() {
   }, [feedback]);
 
   const handleCreateProduct = async (payload) => {
-    // Cria o produto no backend e atualiza a lista local sem novo reload completo.
+    const nextProduct = normalizeProduct(payload);
+
     setSaving(true);
     setFeedback(null);
 
     try {
-      const createdProduct = await createProduct(payload);
+      const createdProduct = await createProduct(nextProduct);
 
       setProducts((currentProducts) =>
         sortProducts(upsertProduct(currentProducts, createdProduct)),
       );
+      await refreshProducts(false);
       setError(null);
 
-      const nextFeedback = buildSuccessFeedback("create", payload.nome);
+      const nextFeedback = buildSuccessFeedback('create', nextProduct.nome);
       setFeedback(nextFeedback);
       setLastUpdated(new Date());
 
@@ -101,10 +126,11 @@ export default function useProducts() {
         message: nextFeedback.text,
       };
     } catch (requestError) {
-      console.error("Erro ao cadastrar produto:", requestError);
-      const nextError = buildApiErrorFeedback(requestError, "/produtos");
+      console.error('Erro ao cadastrar produto:', requestError);
+      const nextError = buildApiErrorFeedback(requestError, '/products');
+
       setFeedback({
-        type: "error",
+        type: 'error',
         text: nextError.message,
         hint: nextError.hint,
       });
@@ -120,19 +146,21 @@ export default function useProducts() {
   };
 
   const handleUpdateProduct = async (productId, payload) => {
-    // Atualiza um item especifico e substitui a linha correspondente no estado local.
+    const nextProduct = normalizeProduct(payload);
+
     setSaving(true);
     setFeedback(null);
 
     try {
-      const updatedProduct = await updateProduct(productId, payload);
+      const updatedProduct = await updateProduct(productId, nextProduct);
 
       setProducts((currentProducts) =>
         sortProducts(upsertProduct(currentProducts, updatedProduct)),
       );
+      await refreshProducts(false);
       setError(null);
 
-      const nextFeedback = buildSuccessFeedback("update", payload.nome);
+      const nextFeedback = buildSuccessFeedback('update', nextProduct.nome);
       setFeedback(nextFeedback);
       setLastUpdated(new Date());
 
@@ -141,13 +169,11 @@ export default function useProducts() {
         message: nextFeedback.text,
       };
     } catch (requestError) {
-      console.error("Erro ao atualizar produto:", requestError);
-      const nextError = buildApiErrorFeedback(
-        requestError,
-        `/produtos/${productId}`,
-      );
+      console.error('Erro ao atualizar produto:', requestError);
+      const nextError = buildApiErrorFeedback(requestError, `/products/${productId}`);
+
       setFeedback({
-        type: "error",
+        type: 'error',
         text: nextError.message,
         hint: nextError.hint,
       });
@@ -163,7 +189,6 @@ export default function useProducts() {
   };
 
   const handleDeleteProduct = async (product) => {
-    // Remove o item na API e depois limpa a mesma entrada no estado do React.
     setDeleteId(product.id);
     setFeedback(null);
 
@@ -172,34 +197,130 @@ export default function useProducts() {
       setProducts((currentProducts) =>
         removeProduct(currentProducts, product.id),
       );
+      await refreshProducts(false);
       setError(null);
       setFeedback({
-        type: "success",
+        type: 'success',
         text: `"${product.nome}" foi removido do inventario.`,
       });
       setLastUpdated(new Date());
-      return true;
+
+      return {
+        ok: true,
+      };
     } catch (requestError) {
-      console.error("Erro ao excluir produto:", requestError);
-      const nextError = buildApiErrorFeedback(
-        requestError,
-        `/produtos/${product.id}`,
-      );
+      console.error('Erro ao excluir produto:', requestError);
+      const nextError = buildApiErrorFeedback(requestError, `/products/${product.id}`);
+
       setFeedback({
-        type: "error",
+        type: 'error',
         text: nextError.message,
         hint: nextError.hint,
       });
-      return false;
+
+      return {
+        ok: false,
+        message: nextError.message,
+        hint: nextError.hint,
+      };
     } finally {
       setDeleteId(null);
     }
   };
 
+  const handleImportProducts = async (items = []) => {
+    const validItems = normalizeProducts(items).filter(isValidProductPayload);
+
+    if (!validItems.length) {
+      const nextMessage = 'Nenhum produto valido foi enviado para importacao.';
+
+      setFeedback({
+        type: 'error',
+        text: nextMessage,
+        hint: 'Revise nome, categoria, preco e quantidade antes de importar.',
+      });
+
+      return {
+        ok: false,
+        importedCount: 0,
+        failedCount: 0,
+        message: nextMessage,
+      };
+    }
+
+    setImporting(true);
+    setFeedback(null);
+
+    let importedCount = 0;
+    let failedCount = 0;
+    let lastError = null;
+
+    try {
+      // O envio sequencial evita sobrecarregar a API e facilita identificar falhas pontuais.
+      for (const product of validItems) {
+        try {
+          await createProduct(product);
+          importedCount += 1;
+        } catch (requestError) {
+          failedCount += 1;
+          lastError = requestError;
+        }
+      }
+
+      if (importedCount > 0) {
+        await refreshProducts(false);
+        setLastUpdated(new Date());
+        setError(null);
+      }
+
+      if (!importedCount) {
+        const nextError = buildApiErrorFeedback(lastError, '/products');
+
+        setFeedback({
+          type: 'error',
+          text: 'Nenhum produto foi importado.',
+          hint: nextError.hint || nextError.message,
+        });
+
+        return {
+          ok: false,
+          importedCount,
+          failedCount,
+          message: 'Nenhum produto foi importado.',
+          hint: nextError.hint || nextError.message,
+        };
+      }
+
+      const nextFeedback = {
+        type: failedCount ? 'info' : 'success',
+        text: failedCount
+          ? `${importedCount} produtos importados e ${failedCount} falharam.`
+          : `${importedCount} produtos importados com sucesso.`,
+        hint: failedCount
+          ? 'Revise o arquivo e tente novamente apenas com os registros que falharam.'
+          : 'A lista do dashboard ja foi atualizada com os novos itens.',
+      };
+
+      setFeedback(nextFeedback);
+
+      return {
+        ok: failedCount === 0,
+        partial: failedCount > 0,
+        importedCount,
+        failedCount,
+        message: nextFeedback.text,
+        hint: nextFeedback.hint,
+      };
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return {
-    products: normalizeProducts(products),
+    products,
     loading,
     saving,
+    importing,
     deleteId,
     error,
     feedback,
@@ -209,6 +330,7 @@ export default function useProducts() {
       createProduct: handleCreateProduct,
       updateProduct: handleUpdateProduct,
       deleteProduct: handleDeleteProduct,
+      importProducts: handleImportProducts,
       clearFeedback: () => setFeedback(null),
     },
   };

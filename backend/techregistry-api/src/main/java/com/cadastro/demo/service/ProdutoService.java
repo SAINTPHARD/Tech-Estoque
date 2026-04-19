@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cadastro.demo.dto.ProdutoRequestDTO;
 import com.cadastro.demo.dto.ProdutoResponseDTO;
 import com.cadastro.demo.entity.Produto;
-import com.cadastro.demo.exception.ResourceNotFoundException;
+import com.cadastro.demo.infra.exception.ResourceNotFoundException;
 import com.cadastro.demo.repository.ProdutoRepository;
 
 @Service

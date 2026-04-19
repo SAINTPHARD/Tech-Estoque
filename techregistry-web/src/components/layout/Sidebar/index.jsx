@@ -1,7 +1,7 @@
 /**
- * Arquivo: src/components/layout/Sidebar/Sidebar.jsx
+ * Arquivo: src/components/layout/Sidebar/index.jsx
  * Responsabilidade: renderizar a navegacao lateral da aplicacao.
- * O que voce encontra aqui: links das secoes principais, comportamento colapsavel e atalhos inferiores.
+ * O que voce encontra aqui: links das secoes principais, atalhos, ajuda e controle da sessao.
  * Quando mexer: altere este arquivo quando a navegacao do sistema mudar.
  */
 
@@ -10,9 +10,11 @@ import {
   BarChart3,
   Boxes,
   ChevronLeft,
+  CircleHelp,
   FileText,
   LayoutDashboard,
   LogIn,
+  LogOut,
   Settings2,
   X,
 } from 'lucide-react';
@@ -41,12 +43,14 @@ const navigationItems = [
 
 export default function Sidebar({
   activeSection = 'dashboard',
+  isAuthenticated = false,
   onSelectSection,
   isCollapsed = false,
   isCompactLayout = false,
   isMobileSidebarOpen = false,
   onCloseMobileSidebar,
   onToggleSidebarCollapse,
+  onHelpShortcut,
   onLoginShortcut,
 }) {
   const shellClassName = [
@@ -68,7 +72,6 @@ export default function Sidebar({
       ) : null}
 
       <aside className={shellClassName} aria-hidden={isCompactLayout && !isMobileSidebarOpen}>
-        {/* A sidebar concentra a troca entre paginas sem depender de um router externo. */}
         <div className="sidebar-card">
           <div className="sidebar-topbar">
             <button
@@ -93,7 +96,7 @@ export default function Sidebar({
 
             <div className="sidebar-brand-copy">
               <strong>Tech Estoque</strong>
-              <p>SaaS de estoque simples</p>
+              <p>Painel operacional conectado ao backend</p>
             </div>
           </div>
 
@@ -139,7 +142,7 @@ export default function Sidebar({
               onClick={() => onSelectSection?.('inventory')}
             >
               <FileText size={16} />
-              <span>Relatorios</span>
+              <span>Produtos cadastrados</span>
             </button>
 
             <button
@@ -166,17 +169,26 @@ export default function Sidebar({
 
             <button
               type="button"
+              className="sidebar-shortcut"
+              onClick={() => onHelpShortcut?.()}
+            >
+              <CircleHelp size={16} />
+              <span>Ajuda</span>
+            </button>
+
+            <button
+              type="button"
               className="sidebar-shortcut sidebar-shortcut-primary"
               onClick={() => onLoginShortcut?.()}
             >
-              <LogIn size={16} />
-              <span>Log in</span>
+              {isAuthenticated ? <LogOut size={16} /> : <LogIn size={16} />}
+              <span>{isAuthenticated ? 'Sair' : 'Log in'}</span>
             </button>
           </div>
 
           <div className="sidebar-footer">
-            <strong>Backend esperado</strong>
-            <p>/api/produtos com nome, categoria, preco e quantidade.</p>
+            <strong>CRUD protegido</strong>
+            <p>GET de produtos e publico. Criacao, edicao e exclusao exigem login valido.</p>
           </div>
         </div>
       </aside>

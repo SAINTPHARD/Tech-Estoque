@@ -1,0 +1,160 @@
+/*
+ * Arquivo: src/components/layout/Footer/style.css
+ * Responsabilidade: definir o visual do rodape da aplicacao.
+ */
+
+.footer-shell {
+  padding: 0 24px 24px;
+}
+
+.footer-card {
+  display: grid;
+  gap: 20px;
+  padding: 22px 24px;
+  border: 1px solid rgba(219, 228, 240, 0.9);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 251, 255, 0.98) 100%);
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+.footer-brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.footer-brand-mark {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2563eb, #22c55e);
+  color: #ffffff;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.footer-brand strong {
+  display: block;
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.footer-brand p {
+  margin: 6px 0 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.footer-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.footer-stat {
+  padding: 16px;
+  border: 1px solid #dbe4f0;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.footer-stat span {
+  display: block;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.footer-stat strong {
+  display: block;
+  margin-top: 8px;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.footer-action-button {
+  min-height: 44px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #dbe4f0;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.footer-action-button:hover {
+  transform: translateY(-1px);
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.footer-action-button-primary {
+  border-color: transparent;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+}
+
+.footer-action-button-primary:hover {
+  border-color: transparent;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.footer-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.footer-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 1100px) {
+  .footer-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-shell {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .footer-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .footer-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-actions > button {
+    width: 100%;
+    justify-content: center;
+  }
+}

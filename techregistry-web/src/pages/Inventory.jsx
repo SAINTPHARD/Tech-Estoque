@@ -1,18 +1,17 @@
 /**
  * Arquivo: src/pages/Inventory.jsx
  * Responsabilidade: reunir o fluxo completo de gestao do estoque.
- * O que voce encontra aqui: formularios, filtros, tabela, feedbacks e exportacao em PDF.
+ * O que voce encontra aqui: formulario de cadastro, filtros, tabela, edicao inline e exportacao em PDF.
  * Quando mexer: use esta pagina quando o CRUD principal de produtos mudar.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import { Download } from 'lucide-react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { PackagePlus } from 'lucide-react';
 import PdfExportMenu from '../components/common/PdfExportMenu';
 import InventoryStats from '../components/dashboard/InventoryStats';
-import CategoryChart from '../components/dashboard/CategoryChart';
 import ProductForm from '../components/dashboard/ProductForm';
 import ProductTable from '../components/dashboard/ProductTable';
-import { PDF_EXPORT_OPTIONS, exportProductsPdf } from '../utils/pdfExporter';
+import { PDF_EXPORT_OPTIONS } from '../utils/pdfExportConfig';
 import {
   STOCK_STATUS_OPTIONS,
   buildCategoryOptions,
@@ -20,11 +19,24 @@ import {
   filterProducts,
 } from '../utils/productHelpers';
 
+const CategoryChart = lazy(() => import('../components/dashboard/CategoryChart'));
+
 function resolveEmptyMessage(hasFilters) {
-  // Troca a mensagem conforme a lista esteja vazia por falta de dados ou por causa dos filtros.
   return hasFilters
     ? 'Nenhum produto encontrado para os filtros atuais.'
     : 'Nenhum produto cadastrado ate o momento.';
+}
+
+function CategoryChartFallback() {
+  return (
+    <div className="category-chart-shell">
+      <div className="category-chart-placeholder">
+        <span className="skeleton-line skeleton-line-sm" />
+        <span className="skeleton-line skeleton-line-lg" />
+        <span className="skeleton-line skeleton-line-md" />
+      </div>
+    </div>
+  );
 }
 
 export default function Inventory({
@@ -46,22 +58,21 @@ export default function Inventory({
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [stockFilter, setStockFilter] = useState('all');
   const [exportFeedback, setExportFeedback] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const createPanelRef = useRef(null);
+  const editPanelRef = useRef(null);
 
   const categoryOptions = useMemo(() => buildCategoryOptions(products), [products]);
   const filteredProducts = useMemo(
-    // A filtragem fica memorizada para evitar recalculos desnecessarios a cada render.
     () =>
       filterProducts(products, {
         searchTerm,
         categoryFilter,
         stockFilter,
       }),
-    [products, searchTerm, categoryFilter, stockFilter]
+    [products, searchTerm, categoryFilter, stockFilter],
   );
-  const filteredStats = useMemo(
-    () => buildInventoryStats(filteredProducts),
-    [filteredProducts]
-  );
+  const filteredStats = useMemo(() => buildInventoryStats(filteredProducts), [filteredProducts]);
 
   useEffect(() => {
     if (!exportFeedback) {
@@ -72,6 +83,17 @@ export default function Inventory({
     return () => window.clearTimeout(timer);
   }, [exportFeedback]);
 
+  useEffect(() => {
+    if (!editingProduct) {
+      return;
+    }
+
+    editPanelRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }, [editingProduct]);
+
   const hasFilters =
     searchTerm.trim() !== '' || categoryFilter !== 'all' || stockFilter !== 'all';
 
@@ -79,14 +101,25 @@ export default function Inventory({
   const editBusy = saving && Boolean(editingProduct);
 
   const clearFilters = () => {
-    // Restaura a visao completa da tabela.
     setSearchTerm('');
     setCategoryFilter('all');
     setStockFilter('all');
   };
 
-  const handleExportPdf = (format) => {
+  const handleGoToCreateProduct = () => {
+    onCancelEdit?.();
+
+    createPanelRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
+
+  const handleExportPdf = async (format) => {
+    setIsExporting(true);
+
     try {
+      const { exportProductsPdf } = await import('../utils/pdfExporter');
       const fileName = exportProductsPdf({
         format,
         products: filteredProducts,
@@ -110,6 +143,8 @@ export default function Inventory({
         text: 'Nao foi possivel gerar o PDF agora.',
         hint: 'Verifique se existem dados validos e tente novamente.',
       });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -149,82 +184,55 @@ export default function Inventory({
       <div className="dashboard-alert-wrapper">
         {filteredStats.criticalProducts > 0 ? (
           <div className="dashboard-alert">
-            <strong>Atenção:</strong>
+            <strong>Atencao:</strong>
             <p>
-              {`Existem ${filteredStats.criticalProducts} produtos em nível crítico neste recorte. Priorize reposição.`}
+              {`Existem ${filteredStats.criticalProducts} produtos em nivel critico neste recorte. Priorize reposicao.`}
             </p>
           </div>
         ) : (
           <div className="dashboard-alert dashboard-alert-ok">
-            <strong>Estoque saudável</strong>
-            <p>O recorte atual não mostra itens críticos. Continue monitorando os filtros.</p>
+            <strong>Estoque saudavel</strong>
+            <p>O recorte atual nao mostra itens criticos. Continue monitorando os filtros.</p>
           </div>
         )}
       </div>
 
       <div className="inventory-forms">
-        <section className="panel">
-          <div className="panel-header">
+        <section ref={createPanelRef} className="panel" id="inventory-create-panel">
+          <div className="panel-header panel-header-inline">
             <div>
               <span className="panel-kicker">Novo produto</span>
               <h3>Cadastro rapido</h3>
-              <p>Preencha somente os campos que existem no backend atual.</p>
+              <p>Adicione produtos individualmente e sincronize na hora com o backend.</p>
             </div>
           </div>
 
           <ProductForm
             onSubmit={onCreateProduct}
-            submitLabel="Cadastrar produto"
+            submitLabel="Adicionar produto"
             busy={createBusy}
           />
         </section>
 
-        {editingProduct ? (
-          <section className="panel">
-            <div className="panel-header">
-              <div>
-                <span className="panel-kicker">Editar produto</span>
-                <h3>{editingProduct.nome}</h3>
-                <p>Atualize os dados do produto selecionado.</p>
-              </div>
-
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={onCancelEdit}
-                disabled={editBusy}
-              >
-                Cancelar edição
-              </button>
+        <section className="panel">
+          <div className="panel-header">
+            <div>
+              <span className="panel-kicker">Visao do estoque</span>
+              <h3>Distribuicao de categorias</h3>
+              <p>Grafico de produtos por categoria exibido em tempo real.</p>
             </div>
+          </div>
 
-            <ProductForm
-              initialValues={editingProduct}
-              onSubmit={onUpdateProduct}
-              submitLabel="Salvar alterações"
-              busy={editBusy}
-              onCancel={onCancelEdit}
-            />
-          </section>
-        ) : (
-          <section className="panel">
-            <div className="panel-header">
-              <div>
-                <span className="panel-kicker">Visão do estoque</span>
-                <h3>Distribuição de categorias</h3>
-                <p>Gráfico de produtos por categoria exibido em tempo real.</p>
-              </div>
-            </div>
-
+          <Suspense fallback={<CategoryChartFallback />}>
             <CategoryChart products={filteredProducts} loading={loading} />
-          </section>
-        )}
+          </Suspense>
+        </section>
       </div>
 
       <section className="panel">
         <div className="panel-header panel-header-inline">
           <div>
-            <span className="panel-kicker">Filtros</span>
+            <span className="panel-kicker">Produtos cadastrados</span>
             <h3>Lista de produtos</h3>
             <p>
               {filteredStats.totalProducts} produtos visiveis e {filteredStats.totalUnits} unidades
@@ -233,6 +241,11 @@ export default function Inventory({
           </div>
 
           <div className="panel-header-actions">
+            <button type="button" className="primary-button" onClick={handleGoToCreateProduct}>
+              <PackagePlus size={16} />
+              Adicionar produto
+            </button>
+
             {hasFilters ? (
               <button type="button" className="secondary-button" onClick={clearFilters}>
                 Limpar filtros
@@ -241,11 +254,40 @@ export default function Inventory({
 
             <PdfExportMenu
               options={PDF_EXPORT_OPTIONS}
-              disabled={loading || !products.length}
+              disabled={loading || isExporting || !products.length}
               onSelect={handleExportPdf}
             />
           </div>
         </div>
+
+        {editingProduct ? (
+          <div ref={editPanelRef} className="inline-editor-shell">
+            <div className="inline-editor-header">
+              <div>
+                <span className="panel-kicker">Editar no mesmo bloco</span>
+                <h3>{editingProduct.nome}</h3>
+                <p>As alteracoes aparecem na tabela assim que a API confirmar a atualizacao.</p>
+              </div>
+
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={onCancelEdit}
+                disabled={editBusy}
+              >
+                Cancelar edicao
+              </button>
+            </div>
+
+            <ProductForm
+              initialValues={editingProduct}
+              onSubmit={onUpdateProduct}
+              submitLabel="Salvar alteracoes"
+              busy={editBusy}
+              onCancel={onCancelEdit}
+            />
+          </div>
+        ) : null}
 
         <div className="inventory-toolbar">
           <label className="field-shell">

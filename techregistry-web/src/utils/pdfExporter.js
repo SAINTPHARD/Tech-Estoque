@@ -16,24 +16,6 @@ import {
   sortProducts,
 } from "./productHelpers";
 
-export const PDF_EXPORT_OPTIONS = [
-  {
-    id: "summary",
-    label: "Resumo executivo",
-    description: "Indicadores, categorias e destaques.",
-  },
-  {
-    id: "inventory",
-    label: "Inventario atual",
-    description: "Tabela completa da visao filtrada.",
-  },
-  {
-    id: "critical",
-    label: "Reposicao urgente",
-    description: "Itens em status critico ou atencao.",
-  },
-];
-
 function buildFileStamp() {
   return new Date().toISOString().slice(0, 10);
 }

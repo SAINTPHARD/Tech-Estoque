@@ -1,4 +1,4 @@
-package com.cadastro.demo.exception;
+package com.cadastro.demo.infra.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 

@@ -1,16 +1,25 @@
 /**
  * Arquivo: src/pages/Settings.jsx
  * Responsabilidade: exibir um resumo tecnico do ambiente do frontend.
- * O que voce encontra aqui: configuracoes da API, contagem de produtos e checklist do estado atual.
+ * O que voce encontra aqui: configuracoes da API, estado da sessao e checklist de operacao.
  * Quando mexer: altere esta pagina quando os metadados tecnicos da aplicacao mudarem.
  */
 
+import { CircleHelp, LogIn } from 'lucide-react';
 import { apiRuntimeConfig } from '../services/api';
 import { formatCurrency } from '../utils/currencyFormatter';
 import { formatDateTime } from '../utils/datePicker';
 import { buildInventoryStats } from '../utils/productHelpers';
 
-export default function Settings({ products, loading, onRefresh }) {
+export default function Settings({
+  products,
+  loading,
+  isAuthenticated = false,
+  operatorLogin = '',
+  onRefresh,
+  onOpenLogin,
+  onOpenHelp,
+}) {
   const stats = buildInventoryStats(products);
 
   return (
@@ -19,12 +28,24 @@ export default function Settings({ products, loading, onRefresh }) {
         <div>
           <span className="page-kicker">Ambiente</span>
           <h2>Resumo tecnico da aplicacao</h2>
-          <p>Esta pagina concentra a configuracao da API e o estado atual da base exibida.</p>
+          <p>Esta pagina concentra integracao, sessao do operador e atalhos de suporte.</p>
         </div>
 
-        <button type="button" className="secondary-button" onClick={() => onRefresh?.()}>
-          Atualizar dados
-        </button>
+        <div className="page-lead-actions">
+          <button type="button" className="secondary-button" onClick={() => onOpenHelp?.()}>
+            <CircleHelp size={16} />
+            Ajuda
+          </button>
+
+          <button type="button" className="secondary-button" onClick={() => onOpenLogin?.()}>
+            <LogIn size={16} />
+            {isAuthenticated ? 'Trocar sessao' : 'Entrar'}
+          </button>
+
+          <button type="button" className="secondary-button" onClick={() => onRefresh?.()}>
+            Atualizar dados
+          </button>
+        </div>
       </div>
 
       <div className="settings-grid">
@@ -53,9 +74,9 @@ export default function Settings({ products, loading, onRefresh }) {
         </article>
 
         <article className="settings-card">
-          <span>Acesso</span>
-          <strong>Log-in do operador</strong>
-          <p>Atalho visual pronto para conectar autenticacao quando o backend tiver esse fluxo.</p>
+          <span>Sessao do operador</span>
+          <strong>{isAuthenticated ? operatorLogin || 'Autenticado' : 'Nao autenticado'}</strong>
+          <p>POST, PUT e DELETE exigem login valido no backend.</p>
         </article>
       </div>
 
@@ -87,6 +108,11 @@ export default function Settings({ products, loading, onRefresh }) {
           <div className="settings-line">
             <strong>Valor total em estoque</strong>
             <span>{formatCurrency(stats.totalValue)}</span>
+          </div>
+
+          <div className="settings-line">
+            <strong>Fluxo de importacao</strong>
+            <span>Dashboard aceita CSV ou JSON e sincroniza automaticamente.</span>
           </div>
         </div>
       </section>

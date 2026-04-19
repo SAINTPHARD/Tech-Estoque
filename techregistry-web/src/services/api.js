@@ -1,69 +1,123 @@
 /**
  * Arquivo: src/services/api.js
- * Responsabilidade: centralizar a configuracao do Axios e injetar o Token JWT.
+ * Responsabilidade: centralizar a configuracao do Axios e o acesso ao token JWT.
  */
 
-import axios from "axios";
+import axios from 'axios';
 
-// Configurações lidas do ambiente Vite
-const rawBaseURL = import.meta.env.VITE_API_BASE_URL || "/api";
-const baseURL = rawBaseURL.replace(/\/$/, "");
-const timeout = Number(import.meta.env.VITE_API_TIMEOUT_MS || 10000);
-const proxyTarget = (
-  import.meta.env.VITE_API_PROXY_TARGET || "http://localhost:8081"
-).replace(/\/$/, "");
+const ACCESS_TOKEN_KEY = 'token';
+
+function normalizeBaseUrl(value, fallback = '/api') {
+  const safeValue =
+    typeof value === 'string' && value.trim() ? value.trim() : fallback;
+
+  return safeValue.replace(/\/$/, '');
+}
+
+function resolveTimeout(value, fallback = 10000) {
+  const parsedTimeout = Number(value);
+
+  return Number.isFinite(parsedTimeout) && parsedTimeout > 0
+    ? parsedTimeout
+    : fallback;
+}
+
+export function getStoredAccessToken() {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+export function setStoredAccessToken(token) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  if (!token) {
+    window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+    return;
+  }
+
+  window.localStorage.setItem(ACCESS_TOKEN_KEY, token);
+}
+
+export function clearStoredAccessToken() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+}
+
+// Le as variaveis do Vite e aplica defaults seguros para desenvolvimento local.
+const baseURL = normalizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
+const timeout = resolveTimeout(import.meta.env.VITE_API_TIMEOUT_MS);
+const proxyTarget = normalizeBaseUrl(
+  import.meta.env.VITE_API_PROXY_TARGET,
+  'http://localhost:8080',
+);
 
 export const apiRuntimeConfig = {
   baseURL,
   timeout,
   proxyTarget,
-  usesDevProxy: import.meta.env.DEV && baseURL.startsWith("/"),
+  usesDevProxy: import.meta.env.DEV && baseURL.startsWith('/'),
 };
 
-// --- Funções Auxiliares de Tratamento de Erro ---
-
-function isAbsoluteUrl(value = "") {
+function isAbsoluteUrl(value = '') {
   return /^https?:\/\//i.test(value);
 }
 
 function extractApiResponseMessage(error) {
   const responseData = error?.response?.data;
-  if (!responseData || typeof responseData !== "object") return null;
+
+  if (!responseData || typeof responseData !== 'object') {
+    return null;
+  }
 
   const details = Array.isArray(responseData.details)
     ? responseData.details.filter(Boolean)
     : [];
 
-  return { message: responseData.message || null, details };
+  return {
+    message: responseData.message || null,
+    details,
+  };
 }
 
-export function describeApiTarget(path = "") {
-  if (isAbsoluteUrl(path)) return path;
-  const normalizedPath = path ? (path.startsWith("/") ? path : `/${path}`) : "";
+export function describeApiTarget(path = '') {
+  if (isAbsoluteUrl(path)) {
+    return path;
+  }
+
+  const normalizedPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
+
   if (apiRuntimeConfig.usesDevProxy) {
     return `${baseURL}${normalizedPath} via proxy para ${proxyTarget}`;
   }
+
   return `${baseURL}${normalizedPath}`;
 }
 
-export function buildApiErrorFeedback(error, path = "") {
+export function buildApiErrorFeedback(error, path = '') {
   const fallbackMessage =
-    "Não foi possível carregar os dados. Verifique o backend.";
+    'Nao foi possivel carregar os dados. Verifique o backend.';
   const requestPath = error?.config?.url || path;
   const targetDescription = describeApiTarget(requestPath);
   const apiError = extractApiResponseMessage(error);
 
-  // Tratamento específico para erro de Autenticação (403 ou 401)
   if (error?.response?.status === 403 || error?.response?.status === 401) {
     return {
-      message: "Sessão expirada ou acesso negado.",
-      hint: "Tente fazer login novamente.",
+      message: 'Sessao expirada ou acesso negado.',
+      hint: 'Faca login novamente para liberar criacao, edicao e exclusao.',
     };
   }
 
-  if (error?.code === "ECONNABORTED") {
+  if (error?.code === 'ECONNABORTED') {
     return {
-      message: "A API demorou demais para responder.",
+      message: 'A API demorou demais para responder.',
       hint: `Destino: ${targetDescription}`,
     };
   }
@@ -74,36 +128,27 @@ export function buildApiErrorFeedback(error, path = "") {
   };
 }
 
-// --- Instância Principal do Axios ---
-
 const api = axios.create({
   baseURL,
   timeout,
   headers: {
-    Accept: "application/json",
-    "Content-Type": "application/json",
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
   },
 });
 
-/**
- * INTERCEPTOR DE REQUISIÇÃO
- * Este bloco é o "Pulo do Gato": ele injeta o Token JWT
- * em todas as chamadas feitas através da instância 'api'.
- */
 api.interceptors.request.use(
   (config) => {
-    // Buscamos o token que foi salvo no localStorage durante o login
-    const token = localStorage.getItem("token");
+    // Todas as requests passam por aqui para manter o token e os headers consistentes.
+    const token = getStoredAccessToken();
 
     if (token) {
-      // Padrão Bearer exigido pelo Spring Security que configuramos
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 export default api;
